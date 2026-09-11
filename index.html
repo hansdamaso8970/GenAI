@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaaS Analytics Dashboard Widget</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Main Widget -->
+  <section class="widget-container" aria-labelledby="widget-title">
+    
+    <header class="widget-header">
+      <div class="header-titles">
+        <h2 id="widget-title">Team Performance</h2>
+        <p class="subtitle">Overview of user activity and status</p>
+      </div>
+      
+      <!-- Controls & Theme Toggle -->
+      <div class="header-actions">
+        <button id="addMemberBtn" class="btn-primary" aria-label="Add new team member">+ Add Member</button>
+        <button id="themeToggle" class="icon-btn theme-toggle-btn" aria-label="Switch to dark mode" title="Toggle Theme">
+          <div class="icon-wrapper">
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Controls: Search & Sort -->
+    <div class="widget-controls">
+      <form class="search-bar" role="search" onsubmit="event.preventDefault();">
+        <label for="searchInput" class="sr-only">Search by name or role</label>
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="searchInput" placeholder="Search team members..." aria-controls="userGrid">
+      </form>
+      
+      <div class="sort-control">
+        <label for="sortSelect" class="sr-only">Sort by</label>
+        <select id="sortSelect">
+          <option value="name">Sort by: Name</option>
+          <option value="activity">Sort by: Activity</option>
+          <option value="status">Sort by: Status</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Dynamic KPIs -->
+    <div class="kpi-container">
+      <div class="kpi-card" tabindex="0">
+        <div class="kpi-header">
+          <h3 class="kpi-title">Total Active</h3>
+          <span class="badge positive" id="kpiActiveTrend" aria-label="Live metric">Live</span>
+        </div>
+        <p class="kpi-value" id="kpiActiveValue">0</p>
+        <div class="kpi-tooltip">Current active members</div>
+      </div>
+      <div class="kpi-card" tabindex="0">
+        <div class="kpi-header">
+          <h3 class="kpi-title">Avg. Efficiency</h3>
+          <span class="badge positive" aria-label="Live metric">Live</span>
+        </div>
+        <p class="kpi-value" id="kpiEffValue">0%</p>
+        <div class="kpi-tooltip">Average activity across team</div>
+      </div>
+      <div class="kpi-card" tabindex="0">
+        <div class="kpi-header">
+          <h3 class="kpi-title">Pending Tasks</h3>
+          <span class="badge warning" aria-label="Live metric">Live</span>
+        </div>
+        <p class="kpi-value" id="kpiPendingValue">0</p>
+        <div class="kpi-tooltip">Total queue across all members</div>
+      </div>
+    </div>
+
+    <!-- Live Grid Region -->
+    <main class="user-grid" id="userGrid" aria-live="polite" aria-busy="true">
+      <!-- Skeletons / User Cards injected via JS -->
+    </main>
+
+  </section>
+
+  <!-- CRUD Form Modal (Hidden) -->
+  <div id="formModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="formTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="formTitle">Add Member</h3>
+        <button id="closeFormBtn" class="icon-btn close-btn" aria-label="Cancel and close form">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </header>
+      <form id="memberForm" class="modal-body form-body">
+        <input type="hidden" id="formUserId">
+        
+        <div class="form-group">
+          <label for="formName">Full Name *</label>
+          <input type="text" id="formName" class="form-control" placeholder="e.g. Jane Doe" aria-describedby="nameError">
+          <span id="nameError" class="error-message" aria-live="polite"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="formRole">Role / Title *</label>
+          <input type="text" id="formRole" class="form-control" placeholder="e.g. UX Designer" aria-describedby="roleError">
+          <span id="roleError" class="error-message" aria-live="polite"></span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="formActivity">Activity % (0-100) *</label>
+            <input type="number" id="formActivity" class="form-control" min="0" max="100" placeholder="e.g. 85" aria-describedby="activityError">
+            <span id="activityError" class="error-message" aria-live="polite"></span>
+          </div>
+          
+          <div class="form-group">
+            <label for="formStatus">Status</label>
+            <select id="formStatus" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Away">Away</option>
+              <option value="Offline">Offline</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="cancelFormBtn" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Detail Modal (Hidden) -->
+  <div id="userModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modalTitle" class="sr-only">User Details</h3>
+        <button id="closeModalBtn" class="icon-btn close-btn" aria-label="Close details">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </header>
+      <div id="modalBody" class="modal-body">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
